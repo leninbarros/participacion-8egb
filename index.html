@@ -453,32 +453,32 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Lista completa de 8 EGB con categorías iniciales listas para los grupos
+    // Lista de 8 EGB con categorías optimizadas
     const alumnos = [
       { id: 1, nombre: "ANGULO, ROMINA", categoria: "ayuda" },
-      { id: 2, nombre: "ASAD, MARTINA", categoria: "ayuda" },
+      { id: 2, nombre: "ASAD, MARTINA", categoria: "promedio" },
       { id: 3, nombre: "BARROS, EMILIA", categoria: "promedio" },
-      { id: 4, nombre: "BECDACH, AMELIA", categoria: "ayuda" },
+      { id: 4, nombre: "BECDACH, AMELIA", categoria: "avanzado" },
       { id: 5, nombre: "BRAVO, RICARDO", categoria: "promedio" },
-      { id: 6, nombre: "CUVI, VICTORIA", categoria: "promedio" },
-      { id: 7, nombre: "DE LA CUEVA, LUIS", categoria: "ayuda" },
-      { id: 8, nombre: "DELGADO, GAEL", categoria: "ayuda" },
-      { id: 9, nombre: "DURAN, JULIA", categoria: "promedio" },
+      { id: 6, nombre: "CUVI, VICTORIA", categoria: "ayuda" },
+      { id: 7, nombre: "DE LA CUEVA, LUIS", categoria: "avanzado" },
+      { id: 8, nombre: "DELGADO, GAEL", categoria: "promedio" },
+      { id: 9, nombre: "DURAN, JULIA", categoria: "ayuda" },
       { id: 10, nombre: "ESPINOSA, JULIA MÍA", categoria: "promedio" },
-      { id: 11, nombre: "ESPINOZA, ASHLY", categoria: "ayuda" },
-      { id: 12, nombre: "FREIRE, MAXIMILIANO", categoria: "promedio" },
-      { id: 13, nombre: "GAIBOR, ANDRES", categoria: "ayuda" },
-      { id: 14, nombre: "JARAMILLO, MICA", categoria: "promedio" },
+      { id: 11, nombre: "ESPINOZA, ASHLY", categoria: "promedio" },
+      { id: 12, nombre: "FREIRE, MAXIMILIANO", categoria: "avanzado" },
+      { id: 13, nombre: "GAIBOR, ANDRES", categoria: "promedio" },
+      { id: 14, nombre: "JARAMILLO, MICA", categoria: "ayuda" },
       { id: 15, nombre: "LARREA, FELIPE", categoria: "avanzado" },
-      { id: 16, nombre: "LEMA, TIAGO", categoria: "ayuda" },
+      { id: 16, nombre: "LEMA, TIAGO", categoria: "promedio" },
       { id: 17, nombre: "LINARES, LUANA", categoria: "ayuda" },
       { id: 18, nombre: "LOPEZ, BENJAMIN", categoria: "promedio" },
-      { id: 19, nombre: "PILLAJO, BRUNO", categoria: "ayuda" },
-      { id: 20, nombre: "RODRIGUEZ, ISABELLA MIA", categoria: "promedio" },
+      { id: 19, nombre: "PILLAJO, BRUNO", categoria: "promedio" },
+      { id: 20, nombre: "RODRIGUEZ, ISABELLA MIA", categoria: "avanzado" },
       { id: 21, nombre: "SALAS, MATHIAS", categoria: "promedio" },
       { id: 22, nombre: "SALAZAR, LUCIANA", categoria: "ayuda" },
-      { id: 23, nombre: "SALTOS, THIAGO", categoria: "ayuda" },
-      { id: 24, nombre: "SANCHEZ, MARÍA PAZ", categoria: "promedio" },
+      { id: 23, nombre: "SALTOS, THIAGO", categoria: "promedio" },
+      { id: 24, nombre: "SANCHEZ, MARÍA PAZ", categoria: "avanzado" },
       { id: 25, nombre: "SARZOSA, LUCIANA", categoria: "promedio" },
       { id: 26, nombre: "VILLARROEL, SOFIA", categoria: "ayuda" }
     ];
@@ -740,7 +740,7 @@
       doc.save(`Bitacora_8EGB_${alumnoActualNombre.replace(/[^a-zA-Z]/g, "_")}.pdf`);
     }
 
-    // Algoritmo de Grupos Automáticos
+    // Algoritmo de Grupos Automáticos Optimizado (Tríos equilibrados)
     function shuffle(array) {
       let currentIndex = array.length, randomIndex;
       while (currentIndex !== 0) {
@@ -766,38 +766,75 @@
       let grupos = [];
       let idsSeleccionados = [];
 
-      while (ayudas.length > 0 && avanzados.length > 0) {
-        let ayu = ayudas.pop();
-        let av = avanzados.pop();
-        let grupoActual = [ayu, av];
-        idsSeleccionados.push(ayu.id, av.id);
+      // Construcción inteligente de grupos priorizando tríos y balance
+      while (ayudas.length > 0 || avanzados.length > 0 || promedios.length > 0) {
+        let grupoActual = [];
 
-        if (promedios.length > 0) {
-          let prom = promedios.pop();
-          grupoActual.push(prom);
-          idsSeleccionados.push(prom.id);
+        // 1. Si hay un avanzado disponible y al menos 2 de ayuda, armar un trío de 1 avanzado y 2 de ayuda
+        if (avanzados.length > 0 && ayudas.length >= 2 && grupoActual.length === 0) {
+          let av = avanzados.pop();
+          let ayu1 = ayudas.pop();
+          let ayu2 = ayudas.pop();
+          grupoActual.push(av, ayu1, ayu2);
+          idsSeleccionados.push(av.id, ayu1.id, ayu2.id);
         }
-        grupos.push(grupoActual);
+        // 2. Si hay estudiantes de ayuda, asegurarles compañía de un promedio o avanzado
+        else if (ayudas.length > 0) {
+          let ayu = ayudas.pop();
+          grupoActual.push(ayu);
+          idsSeleccionados.push(ayu.id);
+
+          if (avanzados.length > 0) {
+            let av = avanzados.pop();
+            grupoActual.push(av);
+            idsSeleccionados.push(av.id);
+          } else if (promedios.length > 0) {
+            let prom = promedios.pop();
+            grupoActual.push(prom);
+            idsSeleccionados.push(prom.id);
+          }
+
+          // Completar el trío a 3 miembros
+          if (grupoActual.length === 2) {
+            if (promedios.length > 0) {
+              let prom = promedios.pop();
+              grupoActual.push(prom);
+              idsSeleccionados.push(prom.id);
+            } else if (avanzados.length > 0) {
+              let av = avanzados.pop();
+              grupoActual.push(av);
+              idsSeleccionados.push(av.id);
+            } else if (ayudas.length > 0) {
+              let ayu2 = ayudas.pop();
+              grupoActual.push(ayu2);
+              idsSeleccionados.push(ayu2.id);
+            }
+          }
+        }
+        // 3. Si no quedan de ayuda, formar tríos con avanzados y promedios restantes
+        else {
+          while (grupoActual.length < 3 && (avanzados.length > 0 || promedios.length > 0)) {
+            if (avanzados.length > 0) {
+              let av = avanzados.pop();
+              grupoActual.push(av);
+              idsSeleccionados.push(av.id);
+            } else if (promedios.length > 0) {
+              let prom = promedios.pop();
+              grupoActual.push(prom);
+              idsSeleccionados.push(prom.id);
+            }
+          }
+        }
+
+        if (grupoActual.length > 0) {
+          grupos.push(grupoActual);
+        }
       }
 
-      let remanentes = [...ayudas, ...avanzados, ...promedios];
-      shuffle(remanentes);
-
-      while (remanentes.length > 0) {
-        if (remanentes.length === 1 && grupos.length > 0) {
-          let ultimo = remanentes.pop();
-          grupos[grupos.length - 1].push(ultimo);
-          idsSeleccionados.push(ultimo.id);
-        } else if (remanentes.length >= 2) {
-          let cantidadTomar = (remanentes.length === 3) ? 3 : 2;
-          let subGrupo = remanentes.splice(0, cantidadTomar);
-          subGrupo.forEach(s => idsSeleccionados.push(s.id));
-          grupos.push(subGrupo);
-        } else {
-          let solo = remanentes.pop();
-          idsSeleccionados.push(solo.id);
-          grupos.push([solo]);
-        }
+      // Evitar que quede un grupo suelto de 1 estudiante al final reasignándolo al grupo anterior
+      if (grupos.length > 1 && grupos[grupos.length - 1].length === 1) {
+        let ultimoMiembro = grupos.pop()[0];
+        grupos[grupos.length - 1].push(ultimoMiembro);
       }
 
       idsSeleccionados.forEach(id => {
