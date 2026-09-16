@@ -407,7 +407,7 @@
   <div class="modal-overlay" id="modalGrupos">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Equipos de Trabajo Optimizados</h2>
+        <h2>Equipos de Trabajo (Grupos de 3 y Sobrante Solo)</h2>
         <button class="close-modal" onclick="cerrarModalGrupos()">×</button>
       </div>
       <div class="modal-body group-grid" id="modalBodyGrupos"></div>
@@ -751,7 +751,7 @@
       return array;
     }
 
-    // GENERADOR DE GRUPOS INTELIGENTE CON CONDICIONAL PARA CURSOS CON POCOS AVANZADOS
+    // GENERADOR DE GRUPOS: ESTRICTAMENTE DE 3 Y SOBRANTES SOLOS EN UN GRUPO
     window.generarGrupos = function() {
       const disponibles = alumnos.filter(a => !document.getElementById(`card-${a.id}`).classList.contains('used'));
 
@@ -760,128 +760,42 @@
         return;
       }
 
-      let ayudas = shuffle(disponibles.filter(a => a.categoria === 'ayuda'));
-      let avanzados = shuffle(disponibles.filter(a => a.categoria === 'avanzado'));
-      let promedios = shuffle(disponibles.filter(a => a.categoria === 'promedio'));
-
+      let lista = shuffle([...disponibles]);
       let grupos = [];
       let idsSeleccionados = [];
 
-      // Umbral: Si hay menos de 3 avanzados, aplicamos tu procedimiento estricto
-      const pocosAvanzados = avanzados.length < 3;
+      let total = lista.length;
+      let i = 0;
 
-      if (pocosAvanzados) {
-        // --- TU PROCEDIMIENTO PARA CURSOS CON POCOS AVANZADOS ---
-
-        // 1. Tríos de un avanzado con dos de ayuda, mientras se pueda
-        while (avanzados.length > 0 && ayudas.length >= 2) {
-          let av = avanzados.pop();
-          let ayu1 = ayudas.pop();
-          let ayu2 = ayudas.pop();
-          
-          let grupo = [av, ayu1, ayu2];
-          grupos.push(grupo);
-          grupo.forEach(m => idsSeleccionados.push(m.id));
+      // Creamos grupos de 3 mientras queden suficientes para formar un bloque completo de 3
+      while (total - i >= 3) {
+        let grupoActual = [];
+        for (let j = 0; j < 3; j++) {
+          let alumnoObj = lista[i++];
+          grupoActual.push(alumnoObj);
+          idsSeleccionados.push(alumnoObj.id);
         }
-
-        // 2. Tríos de un promedio con dos de ayuda, mientras se pueda
-        while (promedios.length > 0 && ayudas.length >= 2) {
-          let prom = promedios.pop();
-          let ayu1 = ayudas.pop();
-          let ayu2 = ayudas.pop();
-          
-          let grupo = [prom, ayu1, ayu2];
-          grupos.push(grupo);
-          grupo.forEach(m => idsSeleccionados.push(m.id));
-        }
-
-        // 3. Juntar todos los sobrantes restantes (ayudas sueltas, avanzados sobrantes, promedios sobrantes)
-        let sobrantes = [...ayudas, ...avanzados, ...promedios];
-        ayudas = []; avanzados = []; promedios = [];
-
-        // Agrupar los sobrantes en bloques de 3 (pueden contener 2 o 3 promedios si sobran)
-        while (sobrantes.length >= 3) {
-          let grupo = [sobrantes.pop(), sobrantes.pop(), sobrantes.pop()];
-          grupos.push(grupo);
-          grupo.forEach(m => idsSeleccionados.push(m.id));
-        }
-
-        // Si quedan 1 o 2 sobrantes al final, agregarlos al último grupo creado para evitar aislamiento
-        if (sobrantes.length > 0 && grupos.length > 0) {
-          sobrantes.forEach(m => {
-            grupos[grupos.length - 1].push(m);
-            idsSeleccionados.push(m.id);
-          });
-        } else if (sobrantes.length > 0) {
-          grupos.push(sobrantes);
-          sobrantes.forEach(m => idsSeleccionados.push(m.id));
-        }
-
-      } else {
-        // --- ALGORITMO EQUITATIVO PARA CURSOS CON VARIOS AVANZADOS ---
-        while (ayudas.length > 0 || avanzados.length > 0 || promedios.length > 0) {
-          let grupoActual = [];
-
-          if (ayudas.length > 0) {
-            let ayu = ayudas.pop();
-            grupoActual.push(ayu);
-            idsSeleccionados.push(ayu.id);
-
-            if (avanzados.length > 0) {
-              let av = avanzados.pop();
-              grupoActual.push(av);
-              idsSeleccionados.push(av.id);
-            } else if (promedios.length > 0) {
-              let prom = promedios.pop();
-              grupoActual.push(prom);
-              idsSeleccionados.push(prom.id);
-            }
-
-            if (grupoActual.length < 3) {
-              if (promedios.length > 0) {
-                let prom = promedios.pop();
-                grupoActual.push(prom);
-                idsSeleccionados.push(prom.id);
-              } else if (avanzados.length > 0) {
-                let av = avanzados.pop();
-                grupoActual.push(av);
-                idsSeleccionados.push(av.id);
-              } else if (ayudas.length > 0) {
-                let ayu2 = ayudas.pop();
-                grupoActual.push(ayu2);
-                idsSeleccionados.push(ayu2.id);
-              }
-            }
-          } else {
-            while (grupoActual.length < 3 && (avanzados.length > 0 || promedios.length > 0)) {
-              if (avanzados.length > 0) {
-                let av = avanzados.pop();
-                grupoActual.push(av);
-                idsSeleccionados.push(av.id);
-              } else if (promedios.length > 0) {
-                let prom = promedios.pop();
-                grupoActual.push(prom);
-                idsSeleccionados.push(prom.id);
-              }
-            }
-          }
-
-          if (grupoActual.length > 0) {
-            grupos.push(grupoActual);
-          }
-        }
-
-        if (grupos.length > 1 && grupos[grupos.length - 1].length === 1) {
-          let huerfano = grupos.pop()[0];
-          grupos[0].push(huerfano);
-        }
+        grupos.push(grupoActual);
       }
 
+      // Si sobran 1 o 2 personas, se colocan juntas en su propio grupo final
+      if (i < total) {
+        let grupoSobrante = [];
+        while (i < total) {
+          let alumnoObj = lista[i++];
+          grupoSobrante.push(alumnoObj);
+          idsSeleccionados.push(alumnoObj.id);
+        }
+        grupos.push(grupoSobrante);
+      }
+
+      // Marcar visualmente como usados
       idsSeleccionados.forEach(id => {
         const card = document.getElementById(`card-${id}`);
         if (card) card.classList.add('used');
       });
 
+      // Renderizar en el modal
       const modalBody = document.getElementById('modalBodyGrupos');
       modalBody.innerHTML = '';
 
@@ -898,7 +812,7 @@
           </div>`;
         }).join('');
 
-        cardDiv.innerHTML = `<h3>Grupo ${index + 1}</h3>${htmlMembers}`;
+        cardDiv.innerHTML = `<h3>Grupo ${index + 1} (${g.length} pers.)</h3>${htmlMembers}`;
         modalBody.appendChild(cardDiv);
       });
 
