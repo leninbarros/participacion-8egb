@@ -740,7 +740,7 @@
       doc.save(`Bitacora_8EGB_${alumnoActualNombre.replace(/[^a-zA-Z]/g, "_")}.pdf`);
     }
 
-    // Algoritmo de Grupos Automáticos Optimizado para Cursos Extremos (Evita alumnos solos)
+    // Funciones auxiliares de mezcla
     function shuffle(array) {
       let currentIndex = array.length, randomIndex;
       while (currentIndex !== 0) {
@@ -751,6 +751,7 @@
       return array;
     }
 
+    // GENERADOR DE GRUPOS INTELIGENTE CON CONDICIONAL PARA CURSOS CON POCOS AVANZADOS
     window.generarGrupos = function() {
       const disponibles = alumnos.filter(a => !document.getElementById(`card-${a.id}`).classList.contains('used'));
 
@@ -766,48 +767,66 @@
       let grupos = [];
       let idsSeleccionados = [];
 
-      // NUEVA LÓGICA: Dar prioridad a garantizar que todo estudiante de "ayuda" tenga al menos 1 o 2 compañeros de apoyo (promedio o avanzado)
-      while (ayudas.length > 0 || avanzados.length > 0 || promedios.length > 0) {
-        let grupoActual = [];
+      // Umbral: Si hay menos de 3 avanzados, aplicamos tu procedimiento estricto
+      const pocosAvanzados = avanzados.length < 3;
 
-        // 1. Si hay estudiantes de ayuda pendientes, formar un equipo asegurando soporte
-        if (ayudas.length > 0) {
-          let ayu = ayudas.pop();
-          grupoActual.push(ayu);
-          idsSeleccionados.push(ayu.id);
+      if (pocosAvanzados) {
+        // --- TU PROCEDIMIENTO PARA CURSOS CON POCOS AVANZADOS ---
 
-          // Buscar un segundo miembro (priorizar avanzado, si no hay, un promedio)
-          if (avanzados.length > 0) {
-            let av = avanzados.pop();
-            grupoActual.push(av);
-            idsSeleccionados.push(av.id);
-          } else if (promedios.length > 0) {
-            let prom = promedios.pop();
-            grupoActual.push(prom);
-            idsSeleccionados.push(prom.id);
-          }
+        // 1. Tríos de un avanzado con dos de ayuda, mientras se pueda
+        while (avanzados.length > 0 && ayudas.length >= 2) {
+          let av = avanzados.pop();
+          let ayu1 = ayudas.pop();
+          let ayu2 = ayudas.pop();
+          
+          let grupo = [av, ayu1, ayu2];
+          grupos.push(grupo);
+          grupo.forEach(m => idsSeleccionados.push(m.id));
+        }
 
-          // Completar a un trío ideal de 3 miembros si hay suficientes recursos o más ayuda disponible
-          if (grupoActual.length < 3) {
-            if (promedios.length > 0) {
-              let prom = promedios.pop();
-              grupoActual.push(prom);
-              idsSeleccionados.push(prom.id);
-            } else if (avanzados.length > 0) {
-              let av = avanzados.pop();
-              grupoActual.push(av);
-              idsSeleccionados.push(av.id);
-            } else if (ayudas.length > 0) {
-              // Si ya no hay promedios ni avanzados, agrupamos con otro de ayuda pero asegurando que queden acompañados por los de la siguiente ronda
-              let ayu2 = ayudas.pop();
-              grupoActual.push(ayu2);
-              idsSeleccionados.push(ayu2.id);
-            }
-          }
-        } 
-        // 2. Si ya no quedan estudiantes de ayuda, agrupar los avanzados y promedios restantes en tríos
-        else {
-          while (grupoActual.length < 3 && (avanzados.length > 0 || promedios.length > 0)) {
+        // 2. Tríos de un promedio con dos de ayuda, mientras se pueda
+        while (promedios.length > 0 && ayudas.length >= 2) {
+          let prom = promedios.pop();
+          let ayu1 = ayudas.pop();
+          let ayu2 = ayudas.pop();
+          
+          let grupo = [prom, ayu1, ayu2];
+          grupos.push(grupo);
+          grupo.forEach(m => idsSeleccionados.push(m.id));
+        }
+
+        // 3. Juntar todos los sobrantes restantes (ayudas sueltas, avanzados sobrantes, promedios sobrantes)
+        let sobrantes = [...ayudas, ...avanzados, ...promedios];
+        ayudas = []; avanzados = []; promedios = [];
+
+        // Agrupar los sobrantes en bloques de 3 (pueden contener 2 o 3 promedios si sobran)
+        while (sobrantes.length >= 3) {
+          let grupo = [sobrantes.pop(), sobrantes.pop(), sobrantes.pop()];
+          grupos.push(grupo);
+          grupo.forEach(m => idsSeleccionados.push(m.id));
+        }
+
+        // Si quedan 1 o 2 sobrantes al final, agregarlos al último grupo creado para evitar aislamiento
+        if (sobrantes.length > 0 && grupos.length > 0) {
+          sobrantes.forEach(m => {
+            grupos[grupos.length - 1].push(m);
+            idsSeleccionados.push(m.id);
+          });
+        } else if (sobrantes.length > 0) {
+          grupos.push(sobrantes);
+          sobrantes.forEach(m => idsSeleccionados.push(m.id));
+        }
+
+      } else {
+        // --- ALGORITMO EQUITATIVO PARA CURSOS CON VARIOS AVANZADOS ---
+        while (ayudas.length > 0 || avanzados.length > 0 || promedios.length > 0) {
+          let grupoActual = [];
+
+          if (ayudas.length > 0) {
+            let ayu = ayudas.pop();
+            grupoActual.push(ayu);
+            idsSeleccionados.push(ayu.id);
+
             if (avanzados.length > 0) {
               let av = avanzados.pop();
               grupoActual.push(av);
@@ -817,19 +836,45 @@
               grupoActual.push(prom);
               idsSeleccionados.push(prom.id);
             }
+
+            if (grupoActual.length < 3) {
+              if (promedios.length > 0) {
+                let prom = promedios.pop();
+                grupoActual.push(prom);
+                idsSeleccionados.push(prom.id);
+              } else if (avanzados.length > 0) {
+                let av = avanzados.pop();
+                grupoActual.push(av);
+                idsSeleccionados.push(av.id);
+              } else if (ayudas.length > 0) {
+                let ayu2 = ayudas.pop();
+                grupoActual.push(ayu2);
+                idsSeleccionados.push(ayu2.id);
+              }
+            }
+          } else {
+            while (grupoActual.length < 3 && (avanzados.length > 0 || promedios.length > 0)) {
+              if (avanzados.length > 0) {
+                let av = avanzados.pop();
+                grupoActual.push(av);
+                idsSeleccionados.push(av.id);
+              } else if (promedios.length > 0) {
+                let prom = promedios.pop();
+                grupoActual.push(prom);
+                idsSeleccionados.push(prom.id);
+              }
+            }
+          }
+
+          if (grupoActual.length > 0) {
+            grupos.push(grupoActual);
           }
         }
 
-        if (grupoActual.length > 0) {
-          grupos.push(grupoActual);
+        if (grupos.length > 1 && grupos[grupos.length - 1].length === 1) {
+          let huerfano = grupos.pop()[0];
+          grupos[0].push(huerfano);
         }
-      }
-
-      // Corrección final anti-aislamiento: Si por residuo matemático queda un último grupo con 1 solo miembro, se distribuye en los grupos anteriores
-      if (grupos.length > 1 && grupos[grupos.length - 1].length === 1) {
-        let huerfano = grupos.pop()[0];
-        // Lo sumamos al primer grupo que tenga espacio o al último disponible
-        grupos[0].push(huerfano);
       }
 
       idsSeleccionados.forEach(id => {
