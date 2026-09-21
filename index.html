@@ -126,8 +126,8 @@
 
     /* ESTILO BASE DE LA TARJETA (MODO ESTUDIANTE POR DEFECTO) */
     .student-card {
-      background-color: #0f172a;
-      border: 1px solid #1e293b;
+      background-color: #fef08a; /* Fondo amarillo */
+      border: 1px solid #eab308;
       border-radius: 6px;
       padding: 6px;
       display: flex;
@@ -142,7 +142,7 @@
     }
 
     .student-card:hover {
-      filter: brightness(1.15);
+      filter: brightness(1.05);
     }
 
     /* INDICADOR DE NOTAS */
@@ -175,10 +175,10 @@
       display: block;
     }
 
-    /* MODO ESTUDIANTE: AZUL MARINO Y LETRAS AMARILLO ELÉCTRICO */
+    /* MODO ESTUDIANTE: NÚMEROS Y LETRAS DE COLOR AZUL */
     .student-card .student-number {
-      background-color: #1e293b;
-      color: #facc15;
+      background-color: #0284c7;
+      color: #fef08a;
       font-weight: bold;
       min-width: 18px;
       height: 16px;
@@ -188,7 +188,6 @@
       justify-content: center;
       font-size: 10px;
       flex-shrink: 0;
-      border: 1px solid #334155;
     }
 
     .student-card .student-lastname {
@@ -197,7 +196,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #38bdf8;
+      color: #1e3a8a; /* Azul oscuro */
       flex-grow: 1;
     }
 
@@ -207,7 +206,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #facc15; /* Amarillo eléctrico por defecto en vista estudiante */
+      color: #1e3a8a; /* Azul oscuro */
       width: 100%;
       text-align: center;
     }
@@ -217,7 +216,7 @@
       background-color: #fef08a;
       border-color: #eab308;
     }
-    .student-card.teacher-mode.cat-avanzado .student-number { background-color: #ca8a04; color: #fef08a; border: none; }
+    .student-card.teacher-mode.cat-avanzado .student-number { background-color: #ca8a04; color: #fef08a; }
     .student-card.teacher-mode.cat-avanzado .student-lastname { color: #854d0e; }
     .student-card.teacher-mode.cat-avanzado .student-name { color: #713f12; }
 
@@ -225,7 +224,7 @@
       background-color: #e9d5ff;
       border-color: #a855f7;
     }
-    .student-card.teacher-mode.cat-ayuda .student-number { background-color: #7e22ce; color: #f3e8ff; border: none; }
+    .student-card.teacher-mode.cat-ayuda .student-number { background-color: #7e22ce; color: #f3e8ff; }
     .student-card.teacher-mode.cat-ayuda .student-lastname { color: #6b21a8; }
     .student-card.teacher-mode.cat-ayuda .student-name { color: #581c87; }
 
@@ -233,19 +232,19 @@
       background-color: #1e293b;
       border-color: #334155;
     }
-    .student-card.teacher-mode.cat-promedio .student-number { background-color: #38bdf8; color: #0f172a; border: none; }
+    .student-card.teacher-mode.cat-promedio .student-number { background-color: #38bdf8; color: #0f172a; }
     .student-card.teacher-mode.cat-promedio .student-lastname { color: #38bdf8; }
     .student-card.teacher-mode.cat-promedio .student-name { color: #f1f5f9; }
 
     /* ESTADO USADO */
     .student-card.used {
-      background-color: #0b0f19 !important;
-      border-color: #1e293b !important;
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
       opacity: 0.3;
     }
-    .student-card.used .student-number { background-color: #1e293b !important; color: #64748b !important; border: none !important; }
+    .student-card.used .student-number { background-color: #475569 !important; color: #94a3b8 !important; }
     .student-card.used .student-lastname,
-    .student-card.used .student-name { color: #475569 !important; text-decoration: line-through; }
+    .student-card.used .student-name { color: #64748b !important; text-decoration: line-through; }
     .student-card.used .star-badge { opacity: 0.2; }
 
     .number-lastname-row {
@@ -558,15 +557,15 @@
   <div class="grid-container" id="grid"></div>
 
   <footer>
-    <button class="action-btn group-btn" onclick="generarGrupos()">⚔️ Crear Grupos Épicos</button>
+    <button class="action-btn group-btn" onclick="generarGrupos()">Crear Grupos</button>
     <button class="action-btn reset-btn" onclick="resetAll()">Restaurar Todo el Tablero</button>
   </footer>
 
-  <!-- MODAL DE GRUPOS ÉPICOS -->
+  <!-- MODAL DE GRUPOS -->
   <div class="modal-overlay" id="modalGrupos">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>⚔️ Equipos de Trabajo</h2>
+        <h2>Equipos de Trabajo</h2>
         <button class="close-modal" onclick="cerrarModalGrupos()">×</button>
       </div>
       <div class="modal-actions-top">
@@ -796,7 +795,7 @@
     }
 
     window.abrirBitacora = function(id, nombreCompleto) {
-      if (!isTeacherMode) return; // Solo permitido en modo profesor
+      if (!isTeacherMode) return;
       alumnoActualId = id;
       alumnoActualNombre = nombreCompleto;
       editandoIndice = null;
