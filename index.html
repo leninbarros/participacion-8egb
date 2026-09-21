@@ -53,6 +53,58 @@
       letter-spacing: 1px;
     }
 
+    /* SWITCH DE VISTA PROFESOR / ESTUDIANTE */
+    .view-switch-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #94a3b8;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #0284c7;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+
     .grid-container {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -72,10 +124,10 @@
       }
     }
 
-    /* ESTILO BASE DE LA TARJETA */
+    /* ESTILO BASE DE LA TARJETA (MODO ESTUDIANTE POR DEFECTO) */
     .student-card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
+      background-color: #0f172a;
+      border: 1px solid #1e293b;
       border-radius: 6px;
       padding: 6px;
       display: flex;
@@ -104,7 +156,7 @@
       border-radius: 50%;
       display: none;
     }
-    .student-card.has-notes .note-indicator {
+    .student-card.has-notes.teacher-mode .note-indicator {
       display: block;
     }
 
@@ -117,47 +169,16 @@
       font-size: 16px;
       font-weight: bold;
       pointer-events: none;
+      display: none;
+    }
+    .student-card.teacher-mode.cat-avanzado .star-badge {
+      display: block;
     }
 
-    /* CATEGORÍAS */
-    .student-card.cat-avanzado {
-      background-color: #fef08a;
-      border-color: #eab308;
-    }
-    .student-card.cat-avanzado .student-number { background-color: #ca8a04; color: #fef08a; }
-    .student-card.cat-avanzado .student-lastname { color: #854d0e; }
-    .student-card.cat-avanzado .student-name { color: #713f12; }
-
-    .student-card.cat-ayuda {
-      background-color: #e9d5ff;
-      border-color: #a855f7;
-    }
-    .student-card.cat-ayuda .student-number { background-color: #7e22ce; color: #f3e8ff; }
-    .student-card.cat-ayuda .student-lastname { color: #6b21a8; }
-    .student-card.cat-ayuda .student-name { color: #581c87; }
-
-    /* ESTADO USADO */
-    .student-card.used {
-      background-color: #1e293b !important;
-      border-color: #334155 !important;
-      opacity: 0.3;
-    }
-    .student-card.used .student-number { background-color: #475569 !important; color: #94a3b8 !important; }
-    .student-card.used .student-lastname,
-    .student-card.used .student-name { color: #64748b !important; text-decoration: line-through; }
-    .student-card.used .star-badge { opacity: 0.2; }
-
-    .number-lastname-row {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 4px;
-      width: 100%;
-    }
-
-    .student-number {
-      background-color: #38bdf8;
-      color: #0f172a;
+    /* MODO ESTUDIANTE: AZUL MARINO Y LETRAS AMARILLO ELÉCTRICO */
+    .student-card .student-number {
+      background-color: #1e293b;
+      color: #facc15;
       font-weight: bold;
       min-width: 18px;
       height: 16px;
@@ -167,9 +188,10 @@
       justify-content: center;
       font-size: 10px;
       flex-shrink: 0;
+      border: 1px solid #334155;
     }
 
-    .student-lastname {
+    .student-card .student-lastname {
       font-size: 11px;
       font-weight: bold;
       white-space: nowrap;
@@ -179,15 +201,59 @@
       flex-grow: 1;
     }
 
-    .student-name {
+    .student-card .student-name {
       font-size: 15px;
       font-weight: bold;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #f1f5f9;
+      color: #facc15; /* Amarillo eléctrico por defecto en vista estudiante */
       width: 100%;
       text-align: center;
+    }
+
+    /* MODO PROFESOR: APLICACIÓN DE CATEGORÍAS */
+    .student-card.teacher-mode.cat-avanzado {
+      background-color: #fef08a;
+      border-color: #eab308;
+    }
+    .student-card.teacher-mode.cat-avanzado .student-number { background-color: #ca8a04; color: #fef08a; border: none; }
+    .student-card.teacher-mode.cat-avanzado .student-lastname { color: #854d0e; }
+    .student-card.teacher-mode.cat-avanzado .student-name { color: #713f12; }
+
+    .student-card.teacher-mode.cat-ayuda {
+      background-color: #e9d5ff;
+      border-color: #a855f7;
+    }
+    .student-card.teacher-mode.cat-ayuda .student-number { background-color: #7e22ce; color: #f3e8ff; border: none; }
+    .student-card.teacher-mode.cat-ayuda .student-lastname { color: #6b21a8; }
+    .student-card.teacher-mode.cat-ayuda .student-name { color: #581c87; }
+
+    .student-card.teacher-mode.cat-promedio {
+      background-color: #1e293b;
+      border-color: #334155;
+    }
+    .student-card.teacher-mode.cat-promedio .student-number { background-color: #38bdf8; color: #0f172a; border: none; }
+    .student-card.teacher-mode.cat-promedio .student-lastname { color: #38bdf8; }
+    .student-card.teacher-mode.cat-promedio .student-name { color: #f1f5f9; }
+
+    /* ESTADO USADO */
+    .student-card.used {
+      background-color: #0b0f19 !important;
+      border-color: #1e293b !important;
+      opacity: 0.3;
+    }
+    .student-card.used .student-number { background-color: #1e293b !important; color: #64748b !important; border: none !important; }
+    .student-card.used .student-lastname,
+    .student-card.used .student-name { color: #475569 !important; text-decoration: line-through; }
+    .student-card.used .star-badge { opacity: 0.2; }
+
+    .number-lastname-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
     }
 
     footer {
@@ -421,7 +487,7 @@
 
     /* ESTILO RELOJ DIGITAL PARA LA CALIFICACIÓN */
     .digital-score-container {
-      display: none; /* Oculto durante los 2 minutos de música */
+      display: none;
       align-items: center;
       justify-content: center;
       gap: 6px;
@@ -479,6 +545,14 @@
 
   <header>
     <h1>REGISTRO DE PARTICIPACIÓN - 8 EGB</h1>
+    <div class="view-switch-container">
+      <span>Modo Estudiante</span>
+      <label class="switch">
+        <input type="checkbox" id="teacherModeToggle" onchange="toggleTeacherMode()">
+        <span class="slider"></span>
+      </label>
+      <span>Modo Profesor</span>
+    </div>
   </header>
 
   <div class="grid-container" id="grid"></div>
@@ -508,7 +582,7 @@
     </div>
   </div>
 
-  <!-- REPRODUCTOR OCULTO DE YOUTUBE (Mazinger Z Instrumental - FQpXZG_u4hw) -->
+  <!-- REPRODUCTOR OCULTO DE YOUTUBE -->
   <div id="audioContainer">
     <iframe id="youtubeAudio" width="200" height="200" src="" frameborder="0" allow="autoplay"></iframe>
   </div>
@@ -589,8 +663,20 @@
     let gruposUltimos = [];
     let puntajesGrupos = {};
     let timerInterval = null;
+    let isTeacherMode = false;
 
-    // Función inteligente para extraer el primer nombre y manejar duplicados en el curso
+    window.toggleTeacherMode = function() {
+      isTeacherMode = document.getElementById('teacherModeToggle').checked;
+      const cards = document.querySelectorAll('.student-card');
+      cards.forEach(card => {
+        if (isTeacherMode) {
+          card.classList.add('teacher-mode');
+        } else {
+          card.classList.remove('teacher-mode');
+        }
+      });
+    };
+
     function obtenerNombreParaGrupo(alumno, listaAlumnos) {
       let apellido = "";
       let primerNombre = "";
@@ -661,7 +747,7 @@
       card.className = `student-card ${catClass}`;
       card.id = `card-${alumno.id}`;
 
-      const estrellaHtml = alumno.categoria === 'avanzado' ? '<div class="star-badge">★</div>' : '';
+      const estrellaHtml = '<div class="star-badge">★</div>';
 
       card.innerHTML = `
         <div class="note-indicator"></div>
@@ -676,7 +762,9 @@
       let pressTimer = null;
       const startPress = () => {
         pressTimer = setTimeout(() => {
-          abrirBitacora(alumno.id, alumno.nombre);
+          if (isTeacherMode) {
+            abrirBitacora(alumno.id, alumno.nombre);
+          }
         }, 600);
       };
       const cancelPress = () => clearTimeout(pressTimer);
@@ -708,6 +796,7 @@
     }
 
     window.abrirBitacora = function(id, nombreCompleto) {
+      if (!isTeacherMode) return; // Solo permitido en modo profesor
       alumnoActualId = id;
       alumnoActualNombre = nombreCompleto;
       editandoIndice = null;
@@ -910,7 +999,6 @@
 
       gruposUltimos = grupos;
 
-      // Inicializar puntajes grupales en 10.0
       grupos.forEach((_, idx) => {
         if (puntajesGrupos[idx] === undefined) puntajesGrupos[idx] = 10.0;
       });
@@ -935,7 +1023,6 @@
             <button class="btn-copy-group" onclick="copiarGrupo(${index})">📋 Copiar</button>
           </div>
 
-          <!-- RELOJ DIGITAL Y CONTROLES (Ocultos inicialmente, aparecen al terminar el tiempo) -->
           <div class="digital-score-container" id="digital-container-${index}">
             <button class="score-btn minus" onclick="modificarNota(${index}, -0.5)">-0.5</button>
             <div class="digital-clock" id="score-clock-${index}">10.0</div>
@@ -951,10 +1038,8 @@
 
       document.getElementById('modalGrupos').classList.add('active');
 
-      // Reproducir música instrumental de Mazinger Z (ID: FQpXZG_u4hw)
       document.getElementById('youtubeAudio').src = "https://www.youtube.com/embed/FQpXZG_u4hw?autoplay=1";
 
-      // Iniciar cuenta regresiva de 2 minutos (120 segundos)
       iniciarTemporizador(120, grupos.length);
     }
 
